@@ -95,6 +95,7 @@
 						<artifactId>docker-maven-plugin</artifactId>
 						<version>${docker-maven-plugin.version}</version>
 						<configuration>
+						<autoCreateCustomNetworks>true</autoCreateCustomNetworks>					
 							<images>
 								<image>
 									<alias>mysql-db</alias>
@@ -113,6 +114,11 @@
 										<ports>
 											<port>${db.port}:${db.port}</port>
 										</ports>
+										<network>
+											<mode>custom</mode>
+											<name>my-network</name>
+											<alias>${db.link.host}</alias>
+										</network>											
 									</run>
 								</image>
 								<image>
@@ -127,9 +133,11 @@
 											<time>30000</time>
 											<log>Successfully applied 1 migration to schema `${db.name}`</log>
 										</wait>
-										<links>
-											<link>mysql-db:${db.link.host}</link>
-										</links>
+										<network>
+											<mode>custom</mode>
+											<name>my-network</name>
+											<alias>flyway</alias>
+										</network>																																
 										<volumes>
 											<bind>
 												<volume>${project.basedir}/sql:/flyway/sql</volume>
@@ -153,12 +161,13 @@
 											<DATABASE_PORT>${db.port}</DATABASE_PORT>
 											<DATABASE_USERNAME>${db.user}</DATABASE_USERNAME>
 											<DATABASE_PASSWORD>${db.password}</DATABASE_PASSWORD>
-										</env>
-										<links>
-											<link>mysql-db:${db.link.host}</link>
-										</links>
+										</env>										
+										<network>
+											<mode>custom</mode>
+											<name>my-network</name>											
+										</network>
 										<dependsOn>
-											<container>flyway/flyway:${flyway.version}</container>
+											<container>flyway/flyway:${docker.flyway.version}</container>
 										</dependsOn>
 										<ports>
 											<port>${jboss.port}:8080</port>
